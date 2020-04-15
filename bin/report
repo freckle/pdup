@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -eu
+
+# Find the executable first (vs using stack-exec later), so the warning about
+# our new GHC is not printed on each execution, and we don't have to silence
+# stderr at every call.
+pdup=$(stack exec which pdup 2>/dev/null)
+
+"$pdup" --days 7
+"$pdup" --days 30
+"$pdup" --days 90

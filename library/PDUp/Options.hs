@@ -6,12 +6,17 @@ where
 
 import RIO
 
-import RIO.Time (UTCTime)
+import RIO.Time (UTCTime, addUTCTime, getCurrentTime)
 
 data Options = Options
-    { oStart :: UTCTime
-    , oEnd :: UTCTime
+    { oSince :: UTCTime
+    , oUntil :: UTCTime
     }
 
 parseOptions :: IO Options
-parseOptions = undefined
+parseOptions = do
+    now <- getCurrentTime
+
+    let since = addUTCTime (negate $ 60 * 60 * 24 * 90) now
+
+    pure Options { oSince = since, oUntil = now }

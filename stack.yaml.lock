@@ -3,7 +3,14 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    hackage: rampart-1.0.0.3@sha256:1ad43abe1aadd3ca9c7885ea86e33d13cc3eddeb3d6f18da2921025f1082b37d,1281
+    pantry-tree:
+      size: 406
+      sha256: 495b2e97ccccf9782e230d52e09ab16f8c37612541228f5b2dfd111b1256d144
+  original:
+    hackage: rampart-1.0.0.3@sha256:1ad43abe1aadd3ca9c7885ea86e33d13cc3eddeb3d6f18da2921025f1082b37d,1281
 snapshots:
 - completed:
     size: 492015

@@ -33,10 +33,27 @@ default-extensions:
 
 library:
   source-dirs: library
+  dependencies:
+    - aeson
+    - bytestring
+    - conduit
+    - errors
+    - http-client
+    - http-conduit
+    - http-link-header
+    - http-types
+    - iso8601-time
+    - optparse-applicative
+    - rampart
+    - retry
+    - text
 
 executables:
   pdup:
     main: Main.hs
     source-dirs: executables
     dependencies:
+      - conduit
+      - errors
+      - load-env
       - pdup
