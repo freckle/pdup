@@ -47,7 +47,7 @@ addOutageFromIncident now outages = addOutage outages . fromIncident now
 
 -- | Add a new Outage, ensuring we don't double-count
 --
--- Assuptions:
+-- Assumptions:
 --
 -- - We see each Outage in order by when it began
 -- - We've accounted for overlap so far
