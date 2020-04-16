@@ -1,9 +1,5 @@
 module PDUp.Incident
-    ( DateRange
-    , dateRange
-    , dateRangeSince
-    , dateRangeUntil
-    , Incident
+    ( Incident
     , incidentBegan
     , incidentResolved
     , sourceIncidents
@@ -22,21 +18,9 @@ import Network.HTTP.Retry
 import Network.HTTP.Simple
 import Network.HTTP.Types.Header (hAccept, hAuthorization)
 import Network.HTTP.Types.Status (status200)
+import PDUp.DateRange
 import PDUp.Token
 import RIO.Time (UTCTime)
-
-data DateRange = DateRange
-    { dateRangeSince :: UTCTime
-    , dateRangeUntil :: UTCTime
-    }
-
-dateRange :: UTCTime -> UTCTime -> Either String DateRange
-dateRange since until
-    | since > until = Left "Since cannot be greater than until"
-    | otherwise = Right DateRange
-        { dateRangeSince = since
-        , dateRangeUntil = until
-        }
 
 data Incidents = Incidents
     { limit :: Natural
@@ -111,9 +95,9 @@ setRequest :: Token -> DateRange -> Request -> Request
 setRequest token range = setFilters range . setAccept . setAuthorization token
 
 setFilters :: DateRange -> Request -> Request
-setFilters DateRange {..} = updateRequestQueryString
-    [ ("since", Just $ C8.pack $ formatISO8601 dateRangeSince)
-    , ("until", Just $ C8.pack $ formatISO8601 dateRangeUntil)
+setFilters range = updateRequestQueryString
+    [ ("since", Just $ C8.pack $ formatISO8601 $ dateRangeSince range)
+    , ("until", Just $ C8.pack $ formatISO8601 $ dateRangeUntil range)
     ]
 
 setAccept :: Request -> Request
