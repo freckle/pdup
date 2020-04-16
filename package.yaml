@@ -57,3 +57,11 @@ executables:
       - errors
       - load-env
       - pdup
+
+tests:
+  spec:
+    main: Spec.hs
+    source-dirs: test
+    dependencies:
+      - hspec
+      - pdup
