@@ -72,7 +72,7 @@ main = do
       let
         diff = negate $ 60 * 60 * 24 * fromIntegral days
         since = addUTCTime diff now
-      logInfo $ "Last " <> displayShow days <> " days' Outages"
+      logInfo $ "Last " <> displayShow days <> " days' outages"
       range <- either throwString pure $ dateRange since now
       run token range
 
@@ -104,9 +104,9 @@ run token range = do
   logInfo
     $ "  "
     <> displayShow outageMinutes
-    <> " minutes outage out of "
+    <> " minutes in outage (out of "
     <> displayShow total
-    <> " minutes total: "
+    <> "): "
     <> displayShow (nines outageMinutes total)
     <> "\n"
  where
