@@ -9,6 +9,7 @@ import Conduit
 import Control.Error.Util (note)
 import LoadEnv (loadEnv)
 import Options.Applicative.Simple
+import PDUp.DateRange
 import PDUp.Incident
 import PDUp.Outages
 import PDUp.Token
