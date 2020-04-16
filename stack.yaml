@@ -1,3 +1,19 @@
 resolver: lts-15.8
 extra-deps:
   - rampart-1.0.0.3@sha256:1ad43abe1aadd3ca9c7885ea86e33d13cc3eddeb3d6f18da2921025f1082b37d,1281
+
+# Fix for weeder with stack-2
+ghc-options:
+  "$locals":
+    -ddump-to-file
+    -ddump-hi
+    -Weverything
+    -Wno-missed-specialisations
+    -Wno-all-missed-specialisations
+    -Wno-unsafe
+    -Wno-safe
+    -Wno-missing-local-signatures
+    -Wno-monomorphism-restriction
+    -Wno-missing-import-lists
+    -Wno-implicit-prelude
+    -fignore-optim-changes
