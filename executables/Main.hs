@@ -1,6 +1,6 @@
 module Main
-    ( main
-    )
+  ( main
+  )
 where
 
 import RIO
@@ -55,62 +55,64 @@ readDayUntil = readDayTime . (<> " 23:59")
 
 readDayTime :: String -> Either String UTCTime
 readDayTime x = note err $ parseTimeM True defaultTimeLocale fmt x
-  where
-    err = x <> " did not parse as time format " <> fmt
-    fmt = "%Y-%m-%d %H:%M"
+ where
+  err = x <> " did not parse as time format " <> fmt
+  fmt = "%Y-%m-%d %H:%M"
 
 main :: IO ()
 main = do
-    loadEnv
-    token <- Token . pack <$> getEnv "PAGERDUTY_TOKEN"
+  loadEnv
+  token <- Token . pack <$> getEnv "PAGERDUTY_TOKEN"
 
-    now <- liftIO getCurrentTime
-    options <- parseOptions $ parser now
+  now <- liftIO getCurrentTime
+  options <- parseOptions $ parser now
 
-    runSimpleApp $ case options of
-        Days days -> do
-            let diff = negate $ 60 * 60 * 24 * fromIntegral days
-                since = addUTCTime diff now
-            logInfo $ "Last " <> displayShow days <> " days' Outages"
-            range <- either throwString pure $ dateRange since now
-            run token range
+  runSimpleApp $ case options of
+    Days days -> do
+      let
+        diff = negate $ 60 * 60 * 24 * fromIntegral days
+        since = addUTCTime diff now
+      logInfo $ "Last " <> displayShow days <> " days' Outages"
+      range <- either throwString pure $ dateRange since now
+      run token range
 
-        Range since until -> do
-            logInfo
-                $ "Outages between "
-                <> displayShow since
-                <> " and "
-                <> displayShow until
-            range <- either throwString pure $ dateRange since now
-            run token range
+    Range since until -> do
+      logInfo
+        $ "Outages between "
+        <> displayShow since
+        <> " and "
+        <> displayShow until
+      range <- either throwString pure $ dateRange since now
+      run token range
 
 
 run :: HasLogFunc env => Token -> DateRange -> RIO env ()
 run token range = do
-    outages <-
-        runConduit
-        $ sourceIncidents token range
-        .| concatC
-        .| iterMC (logDebug . displayShow)
-        .| foldlC (addOutageFromIncident until) emptyOutages
+  outages <-
+    runConduit
+    $ sourceIncidents token range
+    .| concatC
+    .| iterMC (logDebug . displayShow)
+    .| foldlC (addOutageFromIncident until) emptyOutages
 
-    traverseOutages_ (logInfo . ("  - " <>) . display) outages
+  traverseOutages_ (logInfo . ("  - " <>) . display) outages
 
-    let outageMinutes :: Integer
-        outageMinutes = outagesMinutes outages
+  let
+    outageMinutes :: Integer
+    outageMinutes = outagesMinutes outages
 
-    logInfo
-        $ "  "
-        <> displayShow outageMinutes
-        <> " minutes outage out of "
-        <> displayShow total
-        <> " minutes total: "
-        <> displayShow (nines outageMinutes total)
-        <> "\n"
-  where
-    since = dateRangeSince range
-    until = dateRangeUntil range
-    total = round $ diffUTCTime until since / 60
+  logInfo
+    $ "  "
+    <> displayShow outageMinutes
+    <> " minutes outage out of "
+    <> displayShow total
+    <> " minutes total: "
+    <> displayShow (nines outageMinutes total)
+    <> "\n"
+ where
+  since = dateRangeSince range
+  until = dateRangeUntil range
+  total = round $ diffUTCTime until since / 60
 
 nines :: Integer -> Integer -> Double
 nines a b = (fromIntegral (b - a) / fromIntegral b) * 100

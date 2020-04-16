@@ -1,11 +1,11 @@
 module PDUp.Outages
-    ( Outages
-    , traverseOutages_
-    , outagesMinutes
-    , emptyOutages
-    , Outage
-    , addOutageFromIncident
-    )
+  ( Outages
+  , traverseOutages_
+  , outagesMinutes
+  , emptyOutages
+  , Outage
+  , addOutageFromIncident
+  )
 where
 
 import RIO
@@ -26,18 +26,18 @@ emptyOutages :: Outages
 emptyOutages = Outages []
 
 data Outage = Outage
-    { outageBegan :: UTCTime
-    , outageResolved :: UTCTime
-    }
+  { outageBegan :: UTCTime
+  , outageResolved :: UTCTime
+  }
 
 instance Display Outage where
-    display o@Outage {..} =
-        displayShow outageBegan
-            <> " to "
-            <> displayShow outageResolved
-            <> ", "
-            <> displayShow (outageMinutes o)
-            <> " minute(s)"
+  display o@Outage {..} =
+    displayShow outageBegan
+      <> " to "
+      <> displayShow outageResolved
+      <> ", "
+      <> displayShow (outageMinutes o)
+      <> " minute(s)"
 
 outageMinutes :: Outage -> Integer
 outageMinutes Outage {..} = round $ diffUTCTime outageResolved outageBegan / 60
@@ -93,6 +93,6 @@ addOutage (Outages outages) x = Outages $ reverse $ go $ reverse outages
 
 fromIncident :: UTCTime -> Incident -> Outage
 fromIncident now incident = Outage
-    { outageBegan = incidentBegan incident
-    , outageResolved = fromMaybe now $ incidentResolved incident
-    }
+  { outageBegan = incidentBegan incident
+  , outageResolved = fromMaybe now $ incidentResolved incident
+  }
