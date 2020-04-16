@@ -27,11 +27,11 @@ PAGERDUTY_TOKEN={Your PagerDuty API token}
 
 ```console
 % stack exec pdup -- --help
-Usage: pdup ((-d|--days N) | (-u|--since YYYY-MM-DD) [-u|--until YYYY-MM-DD])
+Usage: pdup ((-d|--days N) | (-s|--since YYYY-MM-DD) [-u|--until YYYY-MM-DD])
 
 Available options:
   -d,--days N              Query over previus N days from now
-  -u,--since YYYY-MM-DD    Query since start of date
+  -s,--since YYYY-MM-DD    Query since start of date
   -u,--until YYYY-MM-DD    Query until end of
                            date (default: 2020-04-15 19:18:58.33700956 UTC)
   -h,--help                Show this help text

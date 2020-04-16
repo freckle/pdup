@@ -32,7 +32,7 @@ parser now = asum
             )
     , Range
         <$> option (eitherReader readDaySince)
-            (  short 'u'
+            (  short 's'
             <> long "since"
             <> metavar "YYYY-MM-DD"
             <> help "Query since start of date"
