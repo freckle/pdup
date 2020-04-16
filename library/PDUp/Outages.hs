@@ -11,7 +11,7 @@ where
 import RIO
 
 import PDUp.Incident
-import qualified Rampart
+import Rampart.Simple
 import RIO.Time (UTCTime, diffUTCTime)
 
 newtype Outages = Outages [Outage]
@@ -69,30 +69,11 @@ addOutage (Outages outages) x = Outages $ reverse $ go $ reverse outages
     Concurrent -> mergeOutages x y : ys
     After -> [x, y] <> ys
 
-data OutageRelation
-  = Before
-  | Concurrent
-  | After
+outageRelation :: Outage -> Outage -> Relation
+outageRelation = relate `on` outageInterval
 
-outageRelation :: Outage -> Outage -> OutageRelation
-outageRelation a b = case relation of
-  Rampart.Before -> Before
-  Rampart.Meets -> Concurrent
-  Rampart.Overlaps -> Concurrent
-  Rampart.FinishedBy -> Concurrent
-  Rampart.Contains -> Concurrent
-  Rampart.Starts -> Concurrent
-  Rampart.Equal -> Concurrent
-  Rampart.StartedBy -> Concurrent
-  Rampart.During -> Concurrent
-  Rampart.Finishes -> Concurrent
-  Rampart.OverlappedBy -> Concurrent
-  Rampart.MetBy -> Concurrent
-  Rampart.After -> After
- where
-  relation = Rampart.relate
-    (Rampart.toInterval (outageBegan a, outageResolved a))
-    (Rampart.toInterval (outageBegan b, outageResolved b))
+outageInterval :: Outage -> Interval UTCTime
+outageInterval x = toInterval (outageBegan x, outageResolved x)
 
 mergeOutages :: Outage -> Outage -> Outage
 mergeOutages a b = Outage
