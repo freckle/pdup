@@ -12,6 +12,7 @@ import Rampart hiding (Relation(..), relate)
 import qualified Rampart
 
 data Relation = Before | Concurrent | After
+  deriving (Eq, Show)
 
 relate :: Ord a => Interval a -> Interval a -> Relation
 relate a b = case Rampart.relate a b of
