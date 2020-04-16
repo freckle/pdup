@@ -3,8 +3,9 @@ module PDUp.Outages
   , traverseOutages_
   , outagesMinutes
   , emptyOutages
-  , Outage
+  , Outage(..)
   , addOutageFromIncident
+  , addOutage
   )
 where
 
