@@ -1,10 +1,10 @@
 module PDUp.Token
-    ( Token(..)
-    )
+  ( Token(..)
+  )
 where
 
 import RIO
 
 newtype Token = Token
-    { unToken :: Text
-    }
+  { unToken :: Text
+  }

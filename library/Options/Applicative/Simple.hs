@@ -1,7 +1,7 @@
 module Options.Applicative.Simple
-    ( parseOptions
-    , module Options.Applicative
-    )
+  ( parseOptions
+  , module Options.Applicative
+  )
 where
 
 import Prelude
