@@ -1,9 +1,9 @@
 module PDUp.Outages
-  ( Outages
-  , traverseOutages_
+  ( Outages(..)
   , outagesMinutes
   , emptyOutages
   , Outage(..)
+  , outageMinutes
   , addOutageFromIncident
   , addOutage
   )
@@ -15,10 +15,7 @@ import PDUp.Incident
 import Rampart.Simple
 import RIO.Time (UTCTime, diffUTCTime)
 
-newtype Outages = Outages [Outage]
-
-traverseOutages_ :: Applicative f => (Outage -> f a) -> Outages -> f ()
-traverseOutages_ f (Outages outages) = traverse_ f outages
+newtype Outages = Outages { unOutages :: [Outage] }
 
 outagesMinutes :: Outages -> Integer
 outagesMinutes (Outages outages) = sum $ map outageMinutes outages
@@ -31,14 +28,14 @@ data Outage = Outage
   , outageResolved :: UTCTime
   }
 
-instance Display Outage where
-  display o@Outage {..} =
-    displayShow outageBegan
-      <> " to "
-      <> displayShow outageResolved
-      <> ", "
-      <> displayShow (outageMinutes o)
-      <> " minute(s)"
+-- instance Display Outage where
+--   display o@Outage {..} =
+--     displayShow outageBegan
+--       <> " to "
+--       <> displayShow outageResolved
+--       <> ", "
+--       <> displayShow (outageMinutes o)
+--       <> " minute(s)"
 
 outageMinutes :: Outage -> Integer
 outageMinutes Outage {..} = round $ diffUTCTime outageResolved outageBegan / 60

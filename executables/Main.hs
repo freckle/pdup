@@ -3,8 +3,6 @@ module Main
   )
 where
 
-import RIO
-
 import Conduit
 import Control.Error.Util (note)
 import LoadEnv (loadEnv)
@@ -12,7 +10,9 @@ import Options.Applicative.Simple
 import PDUp.DateRange
 import PDUp.Incident
 import PDUp.Outages
+import PDUp.OutagesTable
 import PDUp.Token
+import RIO
 import RIO.Text (pack)
 import RIO.Time
 import System.Environment (getEnv)
@@ -95,19 +95,19 @@ run token range = do
     .| iterMC (logDebug . displayShow)
     .| foldlC (addOutageFromIncident until) emptyOutages
 
-  traverseOutages_ (logInfo . ("  - " <>) . display) outages
+  logInfo $ display $ tabulateOutages outages
 
   let
-    outageMinutes :: Integer
-    outageMinutes = outagesMinutes outages
+    outage :: Integer
+    outage = outagesMinutes outages
 
   logInfo
     $ "  "
-    <> displayShow outageMinutes
+    <> display outage
     <> " minutes in outage (out of "
-    <> displayShow total
+    <> display total
     <> "): "
-    <> displayShow (nines outageMinutes total)
+    <> display (nines outage total)
     <> "\n"
  where
   since = dateRangeSince range
