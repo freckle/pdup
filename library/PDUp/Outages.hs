@@ -58,9 +58,6 @@ addOutageFromIncident now outages = addOutage outages . fromIncident now
 -- - We only have to check for overlap against the last outage
 -- - And we either combine, or prepend
 --
--- TODO: is there a better structure for this, where last/snoc is as fast as
--- head/cons and we don't have to do the double-reversing?
---
 addOutage :: Outages -> Outage -> Outages
 addOutage (Outages outages) x = Outages $ go outages
  where
