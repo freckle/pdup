@@ -57,7 +57,9 @@ addOutageFromIncident now outages = addOutage outages . fromIncident now
 -- - And we either combine, or prepend
 --
 addOutage :: Outages -> Outage -> Outages
-addOutage (Outages outages) x = Outages $ go outages
+addOutage (Outages outages) x
+  | outageMinutes x == 0 = Outages outages
+  | otherwise = Outages $ go outages
  where
   go [] = [x]
   go (y : ys) = case outageRelation x y of
