@@ -16,13 +16,7 @@ newtype OutagesTable = OutagesTable [OutageRow]
   deriving stock (Eq, Show)
 
 instance Display OutagesTable where
-  textDisplay = \case
-    OutagesTable [] -> divider <> "\n" <> divider
-    OutagesTable rows ->
-      divider <> "\n" <> divideRow (map textDisplay rows) <> "\n" <> divider
-   where
-    divideRow = T.intercalate $ "\n" <> divider <> "\n"
-    divider = "  +------------+----------+------------+----------+"
+  textDisplay (OutagesTable rows) = T.intercalate "\n" $ map textDisplay rows
 
 data OutageRow = OutageRow
   { outageBeganDay :: OutageDay
@@ -36,12 +30,10 @@ data OutageRow = OutageRow
 
 instance Display OutageRow where
   display OutageRow {..} = mconcat
-    [ "  "
-    , "| " <> display outageBeganDay <> " "
-    , "| " <> displayDiffTime outageBeganTime <> " "
-    , "| " <> display outageResolvedDay <> " "
-    , "| " <> displayDiffTime outageResolvedTime <> " "
-    , "| " <> display outageDuration <> " minute(s)"
+    [ "  " <> display outageBeganDay <> displayDiffTime outageBeganTime
+    , " to " <> display outageResolvedDay <> displayDiffTime outageResolvedTime
+    , ", " <> display outageDuration <> " minute(s)"
+    , "\n    - " <> display (T.intercalate "\n    - " outageSummaries)
     ]
 
 data OutageDay = NewDay Day | SameAs Day
@@ -49,8 +41,8 @@ data OutageDay = NewDay Day | SameAs Day
 
 instance Display OutageDay where
   display = \case
-    NewDay x -> displayShow x
-    SameAs _ -> "          "
+    NewDay x -> displayShow x <> ":"
+    SameAs _ -> ""
 
 tabulateOutages :: Outages -> OutagesTable
 tabulateOutages =
