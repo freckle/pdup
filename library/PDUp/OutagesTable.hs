@@ -30,6 +30,7 @@ data OutageRow = OutageRow
   , outageResolvedDay :: OutageDay
   , outageResolvedTime :: DiffTime
   , outageDuration :: Integer
+  , outageSummaries :: [Text]
   }
   deriving stock (Eq, Show)
 
@@ -66,6 +67,7 @@ outageRow rows o@Outage {..} = case rows of
           else NewDay resolvedDay
         , outageResolvedTime = resolvedTime
         , outageDuration = outageMinutes o
+        , outageSummaries = outageSummaries
         }
     ]
 
@@ -85,6 +87,7 @@ outageRow rows o@Outage {..} = case rows of
           else NewDay resolvedDay
         , outageResolvedTime = resolvedTime
         , outageDuration = outageMinutes o
+        , outageSummaries = outageSummaries
         }
       : row
       : rest

@@ -1,7 +1,10 @@
 module PDUp.Incident
   ( Incident
+  , Urgency(..)
   , incidentBegan
   , incidentResolved
+  , incidentUrgency
+  , incidentSummary
   , sourceIncidents
   )
 where
@@ -10,7 +13,7 @@ import RIO
 
 import Conduit
 import Control.Error.Util (hush)
-import Data.Aeson (FromJSON(..))
+import Data.Aeson (FromJSON(..), withText)
 import qualified Data.ByteString.Char8 as BS8
 import Data.Time.ISO8601 (formatISO8601)
 import Network.HTTP.Paginate
@@ -48,9 +51,20 @@ data Incident = Incident
   , created_at :: UTCTime
   , status :: Text
   , last_status_change_at :: UTCTime
+  , urgency :: Urgency
+  , summary :: Text
   }
   deriving stock (Show, Generic)
-    deriving anyclass FromJSON
+  deriving anyclass FromJSON
+
+data Urgency = Low | High
+  deriving stock (Eq, Show)
+
+instance FromJSON Urgency where
+  parseJSON = withText "Urgency" $ \case
+    "low" -> pure Low
+    "high" -> pure High
+    x -> fail $ "Unexpected urgency: " <> show x
 
 incidentBegan :: Incident -> UTCTime
 incidentBegan = created_at
@@ -59,6 +73,12 @@ incidentResolved :: Incident -> Maybe UTCTime
 incidentResolved incident = do
   guard $ status incident == "resolved"
   pure $ last_status_change_at incident
+
+incidentUrgency :: Incident -> Urgency
+incidentUrgency = urgency
+
+incidentSummary :: Incident -> Text
+incidentSummary = summary
 
 sourceIncidents
   :: HasLogFunc env => Token -> DateRange -> ConduitT () [Incident] (RIO env) ()

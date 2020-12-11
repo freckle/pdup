@@ -27,6 +27,7 @@ outageAtMinute :: Integer -> Integer -> Outage
 outageAtMinute began resolved = Outage
   { outageBegan = timeAtMinute began
   , outageResolved = timeAtMinute resolved
+  , outageSummaries = [""]
   }
  where
   timeAtMinute minute = UTCTime

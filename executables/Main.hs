@@ -93,6 +93,7 @@ run token range = do
     $ sourceIncidents token range
     .| concatC
     .| iterMC (logDebug . displayShow)
+    .| filterC ((== High) . incidentUrgency)
     .| foldlC (addOutageFromIncident until) emptyOutages
 
   logInfo $ display $ tabulateOutages outages

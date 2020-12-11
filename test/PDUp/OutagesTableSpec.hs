@@ -54,6 +54,7 @@ makeOutages = Outages . map outage
   outage (began, resolved) = Outage
     { outageBegan = Unsafe.read began
     , outageResolved = Unsafe.read resolved
+    , outageSummaries = []
     }
 
 makeOutagesTable :: [(String, String, String, String, Integer)] -> OutagesTable
@@ -66,6 +67,7 @@ makeOutagesTable = OutagesTable . map outageRow
       , outageResolvedDay = outageDay resolvedDay
       , outageResolvedTime = readDiffTime resolvedTime
       , outageDuration = duration
+      , outageSummaries = []
       }
 
   outageDay = \case

@@ -26,6 +26,7 @@ emptyOutages = Outages []
 data Outage = Outage
   { outageBegan :: UTCTime
   , outageResolved :: UTCTime
+  , outageSummaries :: [Text]
   }
 
 -- instance Display Outage where
@@ -74,10 +75,12 @@ mergeOutages :: Outage -> Outage -> Outage
 mergeOutages a b = Outage
   { outageBegan = min (outageBegan a) (outageBegan b)
   , outageResolved = max (outageResolved a) (outageResolved b)
+  , outageSummaries = outageSummaries a <> outageSummaries b
   }
 
 fromIncident :: UTCTime -> Incident -> Outage
 fromIncident now incident = Outage
   { outageBegan = incidentBegan incident
   , outageResolved = fromMaybe now $ incidentResolved incident
+  , outageSummaries = [incidentSummary incident]
   }
