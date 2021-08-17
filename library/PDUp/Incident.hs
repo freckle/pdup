@@ -100,6 +100,9 @@ newtype ServiceId = ServiceId
 serviceId :: Service -> ServiceId
 serviceId Service { id } = id
 
+serviceSummary :: Service -> Maybe Text
+serviceSummary Service { summary } = summary
+
 data Urgency = Low | High
   deriving stock (Eq, Show)
 
@@ -121,7 +124,8 @@ incidentUrgency :: Incident -> Urgency
 incidentUrgency = urgency
 
 incidentSummary :: Incident -> Text
-incidentSummary = summary
+incidentSummary Incident { service, summary } = prefix <> summary
+  where prefix = maybe "" (<> ": ") $ serviceSummary service
 
 incidentTeamIds :: Incident -> [TeamId]
 incidentTeamIds = map teamId . teams
