@@ -1,15 +1,22 @@
+{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE NamedFieldPuns #-}
+
 module PDUp.Incident
   ( Incident
+  , TeamId(..)
+  , ServiceId(..)
   , Urgency(..)
   , incidentBegan
   , incidentResolved
   , incidentUrgency
   , incidentSummary
+  , incidentTeamIds
+  , incidentServiceId
   , sourceIncidents
   )
 where
 
-import RIO
+import RIO hiding (id)
 
 import Conduit
 import Control.Error.Util (hush)
@@ -23,6 +30,9 @@ import Network.HTTP.Types.Header (hAccept, hAuthorization)
 import Network.HTTP.Types.Status (status200)
 import PDUp.DateRange
 import PDUp.Token
+import qualified RIO.NonEmpty as NE
+import RIO.Text (unpack)
+import qualified RIO.Text as T
 import RIO.Time (UTCTime)
 
 data Incidents = Incidents
@@ -47,7 +57,9 @@ data Incidents = Incidents
   deriving anyclass FromJSON
 
 data Incident = Incident
-  { incident_number :: Integer
+  { teams :: [Team]
+  , service :: Service
+  , incident_number :: Integer
   , created_at :: UTCTime
   , status :: Text
   , last_status_change_at :: UTCTime
@@ -56,6 +68,37 @@ data Incident = Incident
   }
   deriving stock (Show, Generic)
   deriving anyclass FromJSON
+
+newtype Team = Team
+  { id :: TeamId
+  }
+  deriving stock (Show, Generic)
+  deriving anyclass FromJSON
+
+newtype TeamId = TeamId
+  { unTeamId :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+  deriving newtype FromJSON
+
+teamId :: Team -> TeamId
+teamId Team { id } = id
+
+data Service = Service
+  { id :: ServiceId
+  , summary :: Maybe Text
+  }
+  deriving stock (Show, Generic)
+  deriving anyclass FromJSON
+
+newtype ServiceId = ServiceId
+  { unServiceId :: Text
+  }
+  deriving stock (Eq, Show, Generic)
+  deriving newtype FromJSON
+
+serviceId :: Service -> ServiceId
+serviceId Service { id } = id
 
 data Urgency = Low | High
   deriving stock (Eq, Show)
@@ -80,15 +123,26 @@ incidentUrgency = urgency
 incidentSummary :: Incident -> Text
 incidentSummary = summary
 
+incidentTeamIds :: Incident -> [TeamId]
+incidentTeamIds = map teamId . teams
+
+incidentServiceId :: Incident -> ServiceId
+incidentServiceId = serviceId . service
+
 sourceIncidents
-  :: HasLogFunc env => Token -> DateRange -> ConduitT () [Incident] (RIO env) ()
-sourceIncidents token range = do
+  :: HasLogFunc env
+  => Maybe (NonEmpty TeamId)
+  -> Token
+  -> DateRange
+  -> ConduitT () [Incident] (RIO env) ()
+sourceIncidents mTeamIds token range = do
   req <-
     parseRequest
     $ "https://api.pagerduty.com/incidents"
     <> "?sort_by=created_at"
     <> "&limit=500"
     <> "&offset=0"
+    <> maybe "" (("&" <>) . toTeamIdsParam) mTeamIds
 
   sourcePaginatedBy
       pdPagination
@@ -97,6 +151,14 @@ sourceIncidents token range = do
     .| iterMC (logDebug . displayShow)
     .| mapMC fromJSONExceptionThrow
     .| mapC incidents
+
+ where
+  toTeamIdsParam =
+    unpack
+      . ("team_ids%5B%5D=" <>)
+      . T.intercalate "%2C"
+      . map unTeamId
+      . NE.toList
 
 pdPagination
   :: Request -> Response (Either JSONException Incidents) -> Maybe Request

@@ -13,16 +13,39 @@ import PDUp.Outages
 import PDUp.OutagesTable
 import PDUp.Token
 import RIO
+import qualified RIO.NonEmpty as NE
 import RIO.Text (pack)
 import RIO.Time
 import System.Environment (getEnv)
 
-data Options = Days Natural | Range UTCTime UTCTime
+data Options = Options
+  { oTeamIds :: Maybe (NonEmpty TeamId)
+  , oIgnoredServiceIds :: [ServiceId]
+  , oTimeSpan :: TimeSpan
+  }
+
+data TimeSpan = Days Natural | Range UTCTime UTCTime
 
 -- brittany-disable-next-binding
 
 parser :: UTCTime -> Parser Options
-parser now = asum
+parser now = Options
+  <$> (NE.nonEmpty <$> many (TeamId <$> strOption
+    (  short 't'
+    <> long "team"
+    <> help "Filter by Team Id"
+    )))
+  <*> many (ServiceId <$> strOption
+    (  short 'S'
+    <> long "ignore-service"
+    <> help "Ignore Service Id"
+    ))
+  <*> parseTimeSpan now
+
+-- brittany-disable-next-binding
+
+parseTimeSpan :: UTCTime -> Parser TimeSpan
+parseTimeSpan now = asum
     [ Days
         <$> option auto
             (  short 'd'
@@ -65,16 +88,16 @@ main = do
   token <- Token . pack <$> getEnv "PAGERDUTY_TOKEN"
 
   now <- liftIO getCurrentTime
-  options <- parseOptions $ parser now
+  Options {..} <- parseOptions $ parser now
 
-  runSimpleApp $ case options of
+  runSimpleApp $ case oTimeSpan of
     Days days -> do
       let
         diff = negate $ 60 * 60 * 24 * fromIntegral days
         since = addUTCTime diff now
       logInfo $ "Last " <> displayShow days <> " days' outages"
       range <- either throwString pure $ dateRange since now
-      run token range
+      run oTeamIds oIgnoredServiceIds token range
 
     Range since until -> do
       logInfo
@@ -83,16 +106,22 @@ main = do
         <> " and "
         <> displayShow until
       range <- either throwString pure $ dateRange since now
-      run token range
+      run oTeamIds oIgnoredServiceIds token range
 
-
-run :: HasLogFunc env => Token -> DateRange -> RIO env ()
-run token range = do
+run
+  :: HasLogFunc env
+  => Maybe (NonEmpty TeamId)
+  -> [ServiceId]
+  -> Token
+  -> DateRange
+  -> RIO env ()
+run mTeamIds ignoredServiceIds token range = do
   outages <-
     runConduit
-    $ sourceIncidents token range
+    $ sourceIncidents mTeamIds token range
     .| concatC
     .| iterMC (logDebug . displayShow)
+    .| filterC ((`notElem` ignoredServiceIds) . incidentServiceId)
     .| filterC ((== High) . incidentUrgency)
     .| foldlC (addOutageFromIncident until) emptyOutages
 
