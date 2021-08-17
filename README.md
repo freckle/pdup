@@ -27,17 +27,16 @@ PAGERDUTY_TOKEN={Your PagerDuty API token}
 
 ```console
 % stack exec pdup -- --help
-Usage: pdup [(-t|--team ARG) [-t|--team ARG]] [-S|--ignore-service ARG] 
+Usage: pdup [-t|--team ARG] [-S|--ignore-service ARG] 
             ((-d|--days N) | (-s|--since YYYY-MM-DD) [-u|--until YYYY-MM-DD])
 
 Available options:
-  -t,--team ARG            Filter by Team Id
   -t,--team ARG            Filter by Team Id
   -S,--ignore-service ARG  Ignore Service Id
   -d,--days N              Query over previus N days from now
   -s,--since YYYY-MM-DD    Query since start of date
   -u,--until YYYY-MM-DD    Query until end of
-                           date (default: 2021-08-17 18:50:14.662479083 UTC)
+                           date (default: 2021-08-17 19:27:26.739311869 UTC)
   -h,--help                Show this help text
 ```
 
