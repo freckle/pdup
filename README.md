@@ -1,5 +1,8 @@
 # PDUp
 
+> [!WARNING]
+> This repository is archived and no longer maintained.
+
 Report outage minutes and calculate uptime based on PagerDuty incidents.
 
 ## Features
